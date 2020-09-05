@@ -56,7 +56,8 @@ system.cpu.workload = process
 system.cpu.createThreads()
 
 root = Root(full_system = False, system = system)
-root.hello = HelloObject()
+root.hello = HelloObject(fire_count=15)
+root.hello.bye_object = ByeObject(buffer_size='100B')
 
 m5.instantiate()
 

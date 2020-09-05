@@ -1,12 +1,14 @@
-#include "learning_gem5/hello_object.hh"
+#include "learning_gem5/part2/hello_object.hh"
+
 #include "debug/Hello.hh"
-#include <iostream>
 
 HelloObject :: HelloObject(HelloObjectParams *params)
-	: SimObject(params), event([this]{processEvent();}, name())
+	: SimObject(params), event([this]{processEvent();}, name()),
+		obj(*params->bye_object)
 {
-	count = 10;
+	count = params->fire_count;
 	DPRINTF(Hello, "Hello from simobject\n");
+	//panic_if(!object, "Bye Object must be non NULL");
 }
 
 void HelloObject :: startup()
@@ -19,6 +21,9 @@ void HelloObject :: processEvent()
 	DPRINTF(Hello, "Processing event, remaining: %d\n", count--);
 	if(count > 0)
 		schedule(event, curTick()+100);
+
+	if(count == 0)
+		obj.sayBye(this->name());
 }
 
 HelloObject* HelloObjectParams::create()
