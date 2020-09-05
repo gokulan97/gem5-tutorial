@@ -56,6 +56,8 @@ system.cpu.workload = process
 system.cpu.createThreads()
 
 root = Root(full_system = False, system = system)
+root.hello = HelloObject()
+
 m5.instantiate()
 
 print("Beginning simulation")
