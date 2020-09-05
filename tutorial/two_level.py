@@ -1,6 +1,14 @@
 import m5
 from m5.objects import *
 from caches import *
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("--l1d_size", help="L1 DCache size")
+parser.add_option("--l1i_size", help="L1 ICache size")
+parser.add_option("--l2_size", help="L2 Cache size")
+
+(options, args) = parser.parse_args()
 
 system = System()
 
@@ -15,8 +23,8 @@ system.cpu = TimingSimpleCPU()
 
 system.membus = SystemXBar()
 
-system.cpu.icache = L1ICache()
-system.cpu.dcache = L1DCache()
+system.cpu.icache = L1ICache(options)
+system.cpu.dcache = L1DCache(options)
 
 system.cpu.icache.connectCPU(system.cpu)
 system.cpu.dcache.connectCPU(system.cpu)
@@ -26,7 +34,7 @@ system.l2bus = L2XBar()
 system.cpu.icache.connectBus(system.l2bus)
 system.cpu.dcache.connectBus(system.l2bus)
 
-system.l2cache = L2Cache()
+system.l2cache = L2Cache(options)
 system.l2cache.connectCPUSideBus(system.l2bus)
 system.l2cache.connectMemSideBus(system.membus)
 
