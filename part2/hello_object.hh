@@ -6,8 +6,16 @@
 
 class HelloObject : public SimObject
 {
+	private:
+		void processEvent();
+
+		EventFunctionWrapper event;
+		int count;
+
 	public:
 		HelloObject(HelloObjectParams *params);
+
+		void startup();
 };
 
 #endif
