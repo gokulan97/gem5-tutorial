@@ -1,33 +1,28 @@
 
 #include "learning_gem5/mem_object/simple_memobj.hh"
+#include "debug/SimpleMemObj.hh"
 
 SimpleMemObj::SimpleMemObj(SimpleMemObjParams *params) :
-	MemObject(params),
+	SimObject(params),
 	instPort(params->name + ".inst_port", this),
 	dataPort(params->name + ".data_port", this),
 	memPort(params->name + ".mem_port", this),
 	blocked(false)
 	{}
 
-BaseMasterPort& getMasterPort(const std::string& if_name, PortID idx = InvalidPortID)
+Port& SimpleMemObj::getPort(const std::string& if_name, PortID idx)
 {
 	if(if_name == "mem_port")
 		return memPort;
-	else
-		return MemObject::getMasterPort(if_name, idx);
-}
-
-BaseSlavePort& getSlavePort(const std::string& if_name, PortID idx = InvalidPortID)
-{
-	if(if_name == "inst_port")
+	else if(if_name == "inst_port")
 		return instPort;
 	else if(if_name == "data_port")
 		return dataPort;
 	else
-		return MemObject::getSlavePort(if_name, idx);
+		return SimObject::getPort(if_name, idx);
 }
 
-AddrRangeList CPUSidePort::getAddrRanges()
+AddrRangeList CPUSidePort::getAddrRanges() const
 {
 	return owner->getAddrRanges();
 }
@@ -54,19 +49,18 @@ void MemSidePort::recvRangeChange()
 
 void SimpleMemObj::sendRangeChange()
 {
-	instPort.sendRangeChanges();
-	dataPort.sendRangeChanges();
+	instPort.sendRangeChange();
+	dataPort.sendRangeChange();
 }
 
 bool CPUSidePort::recvTimingReq(PacketPtr pkt)
 {
-	if(!owner->handlePacket(pkt))
+	if(!owner->handleRequest(pkt))
 	{
 		needRetry = true;
 		return false;
 	}
-	else
-		return true;
+	return true;
 }
 
 bool SimpleMemObj::handleRequest(PacketPtr pkt)
@@ -145,4 +139,9 @@ void CPUSidePort::trySendRetry()
 		DPRINTF(SimpleMemObj, "sending retry req for id: %d\n", id);
 		sendRetryReq();
 	}
+}
+
+SimpleMemObj* SimpleMemObjParams::create()
+{
+	return new SimpleMemObj(this);
 }

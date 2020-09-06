@@ -1,8 +1,8 @@
 from m5.params import *
 from m5.proxy import *
-from MemObject import MemObject
+from m5.SimObject import SimObject
 
-class SimpleMemObject(MemObject):
+class SimpleMemObj(SimObject):
 	type = "SimpleMemObj"
 	cxx_header = "learning_gem5/mem_object/simple_memobj.hh"
 
