@@ -39,6 +39,7 @@ void BlockingCache::accessTiming(PacketPtr pkt)
 	}
 	else
 	{
+		missTime = curTick();
 		//cache miss
 		pendingPkt = pkt; //store the current req, later packets will get blocked
 
@@ -86,6 +87,7 @@ bool BlockingCache::accessFunctional(PacketPtr pkt)
 
 	if(it != cacheStore.end())//cache hit
 	{
+		hits++;
 		if(pkt->isWrite())//write request: copy data from pkt to cacheStorage
 			pkt->writeDataToBlock(it->second, blockSize);
 		else if(pkt->isRead())// read request: copy data from cacheStorage to pkt
@@ -94,6 +96,7 @@ bool BlockingCache::accessFunctional(PacketPtr pkt)
 			DPRINTF(BCache, "Unknown packet type!");
 		return true;
 	}
+	misses++;
 	return false;//cache miss
 }
 
@@ -241,6 +244,7 @@ bool BlockingCache::handleResponse(PacketPtr pkt)
 
 	if(pendingPkt != nullptr)
 	{
+		missLatency.sample(curTick() - missTime);
 		accessFunctional(pendingPkt); //accessing the cache after data response has been inserted
 		pendingPkt->makeResponse(); // converting the request to a response type
 		delete pkt;
@@ -286,6 +290,26 @@ void CPUSidePort::trySendRetry()
 		DPRINTF(BCache, "sending retry req for id: %d\n", id);
 		sendRetryReq();
 	}
+}
+
+void BlockingCache::regStats()
+{
+	MemObject::regStats();
+
+	hits.name(name()+".hits")
+			.desc("Number of cache hits");
+	
+	misses.name(name()+".misses")
+				.desc("Number of cache misses");
+
+	missLatency.name(name()+".missLatency")
+						 .desc("Histogram of miss latencies")
+						 .init(10);
+
+	hitRatio.name(name()+".hitRatio")
+					.desc("Hit Ratio of cache");
+	
+	hitRatio = hits / (hits + misses);
 }
 
 BlockingCache* BlockingCacheParams::create()

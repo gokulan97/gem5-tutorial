@@ -119,6 +119,13 @@ class BlockingCache : public MemObject
 		//Structure to store cached data
 		std::unordered_map<Addr, uint8_t*> cacheStore;
 
+		Tick missTime;
+
+		Stats::Scalar hits;
+		Stats::Scalar misses;
+		Stats::Histogram missLatency;
+		Stats::Formula hitRatio;
+
 	public:
 		BlockingCache(BlockingCacheParams *params);
 
@@ -152,6 +159,8 @@ class BlockingCache : public MemObject
 		bool accessFunctional(PacketPtr pkt);
 		//helper function to insert data present in pkt into the cache
 		void insert(PacketPtr pkt);
+
+		void regStats() override;
 };
 
 class AccessEvent : public Event
