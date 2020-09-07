@@ -12,6 +12,6 @@ class BlockingCache(MemObject):
 
 	latency = Param.Cycles(1, "Cache Hit Latency or miss resolution latency")
 
-	size = Param.MemorySize('16kB', "Size of cache memory")
+	size = Param.MemorySize('128kB', "Size of cache memory")
 
 	system = Param.System(Parent.any, "The system this cache is part of")
