@@ -1,0 +1,6 @@
+Import("*")
+
+SimObject("BlockingCache.py")
+Source("blocking_cache.cc")
+
+DebugFlag("BCache")

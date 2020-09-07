@@ -12,20 +12,19 @@ system.mem_ranges = [AddrRange('512MB')]
 
 system.cpu = TimingSimpleCPU()
 
-system.memobj = SimpleMemObj()
+system.cache = BlockingCache()
 
 system.membus = SystemXBar()
 
-system.cpu.icache_port = system.memobj.inst_port
-system.cpu.dcache_port = system.memobj.data_port
+system.cpu.icache_port = system.cache.cpu_side
+system.cpu.dcache_port = system.cache.cpu_side
 
+system.cache.mem_side = system.membus.slave
 # x86 specific requirement
 system.cpu.createInterruptController()
 system.cpu.interrupts[0].pio = system.membus.master
 system.cpu.interrupts[0].int_master = system.membus.slave
 system.cpu.interrupts[0].int_slave = system.membus.master
-
-system.memobj.mem_port = system.membus.slave
 
 system.system_port = system.membus.slave
 
