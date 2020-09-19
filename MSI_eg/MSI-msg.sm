@@ -1,0 +1,64 @@
+enumeration(CoherenceResponseType, desc="response to core from sibilings or other directory")
+{
+	Data, desc="Data requested";
+	InvAck, desc="ACK for Inv sent earlier";
+}
+
+structure(ResponseMsg, desc="Response message from Sibilings or directory, can be data or InvAck",
+											 interface="Message")
+{
+	Addr addr,											desc="PADDR for this response";
+	CoherenceResponseType Type,			desc="Type of this packet - data/InvAck";
+	MachineID Sender,								desc="ID of sender";
+	NetDest Destination,						desc="Multicast destination mask";
+	DataBlock DataBlk,							desc="Data for cache line";
+	MessageSizeType MessageSize,		desc="size category of this message";
+	int Acks,												desc="Number of InvAcks to receive";
+
+	bool functionalRead(Packet* pkt)
+	{
+		if(Type == CoherenceResponseType:Data)
+		{
+			return testAndRead(addr, DataBlk, pkt);
+		}
+		return false;
+	}
+
+	bool functionalWrite(Packet* pkt)
+	{
+		return testAndWrite(addr, DataBlk, pkt);
+	}
+}
+
+enumeration(CoherenceRequestType, desc="request from core to sibilings or directory")
+{
+	GetS, desc="Read Request";
+	GetM, desc="Write Request";
+
+	PutS, desc="Clean WriteBack";
+	PutM, desc="Dirty writeback";
+
+	Inv, desc="Probe cache and invalidate any valid block";
+	PutAck, desc="Put request has been processed";
+}
+
+structure(RequestMsg, desc="Coherence request message", interface="Message")
+{
+	Addr addr,											desc="PADDR for request";
+	CoherenceRequestType Type,			desc="Request type";
+	MachineID Requestor,						desc="ID of request origin";
+	NetDest Destination,						desc="Multicast bitmap";
+	DataBlock DataBlk,							desc="Data of the cache block";
+	MessageSizeType MessageSize,		desc="size of this message";
+
+	bool functionalRead(Packet *pkt)
+	{
+		return false;
+	}
+
+	bool functionalWrite(Packet *pkt)
+	{
+		return testAndWrite(addr, DataBlk, pkt);
+	}
+}
+
